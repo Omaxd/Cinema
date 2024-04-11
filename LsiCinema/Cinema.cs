@@ -12,9 +12,9 @@ namespace LsiCinema
 
         private SeatPointer[][] _pointerToSeats;
 
-        public Cinema() 
+        public Cinema()
         {
-            _cinema = SeatFiller.FillSeats();
+            _cinema = SeatFiller.FillSeats3();
             FillSeatPointer();
         }
 
@@ -51,7 +51,7 @@ namespace LsiCinema
                     }
 
                     if (maxRow <= _centerRow)
-                    {                       
+                    {
                         CreateFirstIterationInRow(maxRow * (int)Side.Up);
                         CreateFirstIterationInRow(maxRow * (int)Side.Down);
                         maxRow++;
@@ -60,7 +60,7 @@ namespace LsiCinema
 
                 Console.WriteLine("Nie znaleziono żadnych miejsc");
             }
-            catch(FoundResultException e)
+            catch (FoundResultException e)
             {
                 Console.WriteLine(string.Format("Znaleziono dwa miejsca w rzędzie {0}: {1}, {2}",
                     e.Row,
@@ -72,14 +72,16 @@ namespace LsiCinema
         private void CreateFirstIterationInRow(int row)
         {
             row += _centerRow;
-            _pointerToSeats[row][(int)Side.Left].CurrentIsFree =
-                _cinema[row][_pointerToSeats[row][(int)Side.Left].Number] == 1;
 
-            _pointerToSeats[row][(int)Side.Right].CurrentIsFree =
-                _cinema[row][_pointerToSeats[row][(int)Side.Right].Number] == 1;
+            _pointerToSeats[row][(int)Side.Left].CurrentState =
+                (SeatState)_cinema[row][_pointerToSeats[row][(int)Side.Left].Number];
 
-            if (_pointerToSeats[row][(int)Side.Left].CurrentIsFree == true &&
-                _pointerToSeats[row][(int)Side.Right].CurrentIsFree == true)
+            _pointerToSeats[row][(int)Side.Right].CurrentState =
+                (SeatState)_cinema[row][_pointerToSeats[row][(int)Side.Right].Number];
+
+            if (IsThisPlaceIsValid(
+                _pointerToSeats[row][(int)Side.Left].CurrentState,
+                _pointerToSeats[row][(int)Side.Right].CurrentState))
             {
                 throw new FoundResultException(
                     row,
@@ -96,11 +98,10 @@ namespace LsiCinema
             int row = _centerRow + rowDistance * (int)vertical;
             int side = (int)horizontal;
 
-            _pointerToSeats[row][side].CurrentIsFree =
-                _cinema[row][_pointerToSeats[row][side].Number] == 1;
+            _pointerToSeats[row][side].CurrentState =
+                (SeatState)_cinema[row][_pointerToSeats[row][side].Number];
 
-            if (_pointerToSeats[row][side].CurrentIsFree &&
-                _pointerToSeats[row][side].PreviousIsFree)
+            if (_pointerToSeats[row][side].IsTwoSeatsValid())
             {
                 throw new FoundResultException(
                     row,
@@ -124,6 +125,17 @@ namespace LsiCinema
                     new SeatPointer(centerNumber, 1)
                 };
             }
+        }
+
+        private bool IsThisPlaceIsValid(SeatState left, SeatState right)
+        {
+            if ((left == SeatState.SingleFree && right == SeatState.SingleFree) ||
+                (left == SeatState.LeftFree && right == SeatState.RightFree))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

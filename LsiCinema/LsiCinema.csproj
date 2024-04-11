@@ -46,6 +46,7 @@
     <Compile Include="SeatFiller.cs" />
     <Compile Include="SeatPointer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SeatState.cs" />
     <Compile Include="Side.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
